@@ -1,0 +1,22 @@
+{
+    "name": "szepeviktor/check-versions",
+    "description": "Check all versions",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Szepeviktor\\CheckVersions\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Viktor Szépe",
+            "email": "viktor@szepe.net"
+        }
+    ],
+    "require": {
+        "ext-yaml": "*"
+    },
+    "scripts": {
+        "all": "@php src/all.php"
+    }
+}

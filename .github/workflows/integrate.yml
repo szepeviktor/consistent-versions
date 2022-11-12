@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow
+
+name: "Integrate"
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request: null
+  # Add [skip ci] to commit message to skip CI.
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  run-all:
+    name: "Run all checks"
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: "Set up PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "8.0"
+          extensions: "yaml"
+          coverage: "none"
+
+      - name: "Checkout code"
+        uses: "actions/checkout@v3"
+
+      - name: "Install dependencies"
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: "highest"
+
+      - run: "composer run all"
