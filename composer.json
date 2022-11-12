@@ -4,7 +4,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Szepeviktor\\CheckVersions\\": "src/"
+            "SzepeViktor\\CheckVersions\\": "src/"
         }
     },
     "authors": [
@@ -17,6 +17,6 @@
         "ext-yaml": "*"
     },
     "scripts": {
-        "all": "@php src/all.php"
+        "all": "@php example-checks.php"
     }
 }
