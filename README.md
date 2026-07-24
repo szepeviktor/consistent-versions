@@ -15,6 +15,7 @@ places, for example:
 - a PHPStan NEON configuration;
 - a PHPCS ruleset;
 - an INI or simple `.env` file;
+- a Gettext PO or POT header;
 - a PHP class constant;
 - Markdown documentation;
 - a plain `VERSION` file.
@@ -521,6 +522,57 @@ The reader does not copy parsed values into the process environment.
 This is an INI reader, not a complete Dotenv implementation. Dotenv-specific
 features such as `export KEY=value`, shell expansion, and complex multiline
 values are not supported.
+
+### `gettext`
+
+Reads metadata from the empty `msgid` header entry of a Gettext `.po` or `.pot`
+file. Escaped continuation strings are decoded without requiring the PHP
+Gettext extension.
+
+Input:
+
+```pot
+msgid ""
+msgstr ""
+"Project-Id-Version: Test Mode 1.0.2\n"
+"MIME-Version: 1.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
+```
+
+Virtual document:
+
+```json
+{
+    "headers": {
+        "Project-Id-Version": "Test Mode 1.0.2",
+        "MIME-Version": "1.0",
+        "X-Generator": "WP-CLI 2.12.0"
+    },
+    "project": {
+        "name": "Test Mode",
+        "version": "1.0.2"
+    }
+}
+```
+
+The conventional `Project-Id-Version: PACKAGE VERSION` value is split at its
+last whitespace boundary. This provides a version scalar that can be selected
+without a regular expression:
+
+```yaml
+reader: gettext
+file: languages/test-mode.pot
+path: $.project.version
+```
+
+Any raw header remains available by name:
+
+```yaml
+path: $['headers']['X-Generator']
+```
+
+The reader intentionally parses catalog metadata, not individual translation
+entries.
 
 ### `text`
 
@@ -1370,7 +1422,7 @@ Examples include:
 - unknown normalizer;
 - unreadable file;
 - missing environment variable;
-- invalid JSON, YAML, NEON, INI, or XML;
+- invalid JSON, YAML, NEON, INI, Gettext, or XML;
 - invalid JSONPath;
 - selector returning zero or several values;
 - selector returning an array or object;

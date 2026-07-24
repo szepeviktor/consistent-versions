@@ -15,6 +15,7 @@ final class ReaderRegistry
     {
         $registry = new self();
         $registry->register('env', new EnvironmentReader());
+        $registry->register('gettext', new GettextReader());
         $registry->register('ini', new IniReader());
         $registry->register('json', new JsonReader());
         $registry->register('composer', new ComposerReader());

@@ -33,6 +33,9 @@ $value = static function (string $reader, string $file, string $path) use ($read
 };
 
 $same('1.2.3', $value('json', 'data.json', '$.package.version'), 'JSON reader');
+$same('1.2.3', $value('gettext', 'messages.pot', '$.project.version'), 'Gettext project version');
+$same('Example Plugin', $value('gettext', 'messages.pot', '$.project.name'), 'Gettext project name');
+$same('WP-CLI 2.12.0', $value('gettext', 'messages.pot', "$.headers['X-Generator']"), 'Gettext header');
 $same('8.1', $value('ini', 'settings.ini', '$.PHP_VERSION'), 'INI reader');
 $same('2.0.0', $value('ini', 'settings.ini', '$.tool.version'), 'INI section');
 $same('^8.1', $value('composer', 'composer.json', '$.require.php'), 'Composer reader');
