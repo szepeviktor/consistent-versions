@@ -4,7 +4,6 @@ parameters:
     paths:
         - src
         - tests
-        - tools
     tmpDir: /tmp/consistent-versions-phpstan
     treatPhpDocTypesAsCertain: true
     parallel:

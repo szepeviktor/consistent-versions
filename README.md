@@ -1492,8 +1492,8 @@ machine-readable metadata in this README:
 composer versions
 ```
 
-PHPStan analyses `src`, `tests`, and `tools` at level `max`. There is no
-baseline and no ignored error category.
+PHPStan analyses `src` and `tests` at level `max`. There is no baseline and no
+ignored error category.
 
 The test suite covers all built-in readers, JSONPath selection, normalizers,
 successful checks, and mismatch reporting. CI runs the complete suite on PHP
