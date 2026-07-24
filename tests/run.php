@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use SzepeViktor\ConsistentVersions\Engine;
+use SzepeViktor\ConsistentVersions\Exception\ParseException;
 use SzepeViktor\ConsistentVersions\Exception\SelectionException;
 use SzepeViktor\ConsistentVersions\Normalizer\NormalizerRegistry;
 use SzepeViktor\ConsistentVersions\Reader\ReaderRegistry;
@@ -32,6 +33,8 @@ $value = static function (string $reader, string $file, string $path) use ($read
 };
 
 $same('1.2.3', $value('json', 'data.json', '$.package.version'), 'JSON reader');
+$same('8.1', $value('ini', 'settings.ini', '$.PHP_VERSION'), 'INI reader');
+$same('2.0.0', $value('ini', 'settings.ini', '$.tool.version'), 'INI section');
 $same('^8.1', $value('composer', 'composer.json', '$.require.php'), 'Composer reader');
 $same('8.1', $value('yaml', 'data.yaml', '$.jobs.tests.strategy.matrix.php[0]'), 'YAML reader');
 $same(80100, $value('neon', 'phpstan.neon', '$.parameters.phpVersion'), 'NEON reader');
@@ -58,6 +61,10 @@ $same('1.2.3', $value('php', 'constants.php', "$.constants['Example\\\\PACKAGE_V
 $same('1.2.3', $value('text', 'VERSION', '$'), 'Text reader');
 $same('1.2.3', $value('json', 'data.json', '$..version'), 'JSONPath recursive descent');
 
+$tagVariable = 'CONSISTENT_VERSIONS_TEST_TAG';
+putenv($tagVariable . '=v1.2.3');
+$same('v1.2.3', $selector->select($readers->get('env')->read($tagVariable), '$'), 'Environment reader');
+
 $normalizers = NormalizerRegistry::withDefaults();
 $same('8.1', $normalizers->normalize('^8.1', ['composer-minimum']), 'Composer lower bound');
 $same('8.1', $normalizers->normalize(80100, ['php-version-id']), 'PHP version ID');
@@ -80,6 +87,11 @@ $configuration = [
                     'reader' => 'php',
                     'file' => 'constants.php',
                     'path' => "$.classes['Example\\\\Plugin'].constants.VERSION",
+                ],
+                'CI tag' => [
+                    'reader' => 'env',
+                    'variable' => $tagVariable,
+                    'normalize' => 'trim-v-prefix',
                 ],
             ],
         ],
@@ -128,5 +140,14 @@ try {
 } catch (SelectionException) {
     ++$tests;
 }
+
+putenv('CONSISTENT_VERSIONS_TEST_MISSING');
+try {
+    $readers->get('env')->read('CONSISTENT_VERSIONS_TEST_MISSING');
+    throw new RuntimeException('Environment reader should reject a missing variable');
+} catch (ParseException) {
+    ++$tests;
+}
+putenv($tagVariable);
 
 fwrite(STDOUT, sprintf("OK (%d assertions)\n", $tests));

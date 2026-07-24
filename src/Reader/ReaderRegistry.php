@@ -14,6 +14,8 @@ final class ReaderRegistry
     public static function withDefaults(): self
     {
         $registry = new self();
+        $registry->register('env', new EnvironmentReader());
+        $registry->register('ini', new IniReader());
         $registry->register('json', new JsonReader());
         $registry->register('composer', new ComposerReader());
         $registry->register('yaml', new YamlReader());

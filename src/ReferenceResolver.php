@@ -6,6 +6,7 @@ namespace SzepeViktor\ConsistentVersions;
 
 use SzepeViktor\ConsistentVersions\Exception\ConfigurationException;
 use SzepeViktor\ConsistentVersions\Normalizer\NormalizerRegistry;
+use SzepeViktor\ConsistentVersions\Reader\DirectInputReader;
 use SzepeViktor\ConsistentVersions\Reader\ReaderRegistry;
 
 final class ReferenceResolver
@@ -35,10 +36,22 @@ final class ReferenceResolver
         }
 
         $readerName = $reference['reader'] ?? null;
-        $file = $reference['file'] ?? null;
         $path = $reference['path'] ?? '$';
-        if (!is_string($readerName) || !is_string($file) || !is_string($path)) {
-            throw new ConfigurationException('A source requires string "reader", "file", and optional "path" fields');
+        if (!is_string($readerName) || !is_string($path)) {
+            throw new ConfigurationException('A source requires a string "reader" and optional "path" field');
+        }
+        $reader = $this->readers->get($readerName);
+        $inputField = $reader instanceof DirectInputReader ? $reader->inputField() : 'file';
+        $input = $reference[$inputField] ?? null;
+        if (!is_string($input)) {
+            throw new ConfigurationException(sprintf(
+                'Reader "%s" requires a string "%s" field',
+                $readerName,
+                $inputField
+            ));
+        }
+        if (!$reader instanceof DirectInputReader) {
+            $input = $this->absolutePath($baseDirectory, $input);
         }
 
         $normalizers = $reference['normalize'] ?? [];
@@ -56,7 +69,7 @@ final class ReferenceResolver
             $normalizerNames[] = $normalizer;
         }
 
-        $document = $this->readers->get($readerName)->read($this->absolutePath($baseDirectory, $file));
+        $document = $reader->read($input);
         $value = $this->selector->select($document, $path);
         $value = $this->normalizers->normalize($value, $normalizerNames);
 

@@ -14,11 +14,13 @@ places, for example:
 - a GitHub Actions workflow;
 - a PHPStan NEON configuration;
 - a PHPCS ruleset;
+- an INI or simple `.env` file;
 - a PHP class constant;
 - Markdown documentation;
 - a plain `VERSION` file.
 
-The tool only reads and compares files. It never rewrites them.
+The tool only reads and compares configured sources. It never rewrites files
+or changes environment variables.
 
 ## Table of contents
 
@@ -77,8 +79,8 @@ Typical mistakes it detects include:
 
 ## How it works
 
-Each supported file is read by a format-aware **reader**. The reader converts
-the file into a virtual JSON-like document.
+Each supported source is read by a format-aware **reader**. The reader converts
+the source into a virtual JSON-like document.
 
 For example, this WordPress plugin header:
 
@@ -329,7 +331,8 @@ A source supports:
 | Field | Required | Default | Description |
 | --- | --- | --- | --- |
 | `reader` | yes | — | Reader name |
-| `file` | yes | — | File path relative to the configuration |
+| `file` | for file readers | — | File path relative to the configuration |
+| `variable` | for `env` | — | Environment variable name |
 | `path` | no | `$` | JSONPath selecting exactly one scalar |
 | `normalize` | no | none | Source-specific normalizer or list |
 
@@ -452,6 +455,72 @@ Stable project configuration should normally use direct, deterministic paths.
 
 Every reader returns a virtual JSON-like document. Use JSONPath to select a
 value from that document.
+
+### `env`
+
+Reads one explicitly named environment variable. It does not expose the rest
+of the process environment.
+
+```yaml
+reader: env
+variable: GITHUB_REF_NAME
+path: $
+```
+
+The virtual document is the variable's string value. The default `$` path is
+therefore normally sufficient. An unset variable is a parsing error; a set but
+empty variable is a valid empty string.
+
+For a release tag such as `v1.2.3`, normalizers can remove the prefix and
+validate the version:
+
+```yaml
+reader: env
+variable: GITHUB_REF_NAME
+normalize:
+  - trim-v-prefix
+  - version
+```
+
+### `ini`
+
+Parses PHP INI syntax using raw value scanning. It works with `.ini` files and
+simple `.env` files that contain `KEY=value` assignments.
+
+Input:
+
+```ini
+PHP_VERSION="8.1"
+PLUGIN_VERSION="1.2.3"
+
+[tool]
+version="2.0.0"
+```
+
+Selectors:
+
+```yaml
+# Top-level value
+path: $.PHP_VERSION
+
+# Value inside an INI section
+path: $.tool.version
+```
+
+A complete source definition for `.env` is:
+
+```yaml
+reader: ini
+file: .env
+path: $.PHP_VERSION
+```
+
+`INI_SCANNER_RAW` keeps every value as a string, so `8.1` remains `"8.1"`.
+The reader does not copy parsed values into the process environment.
+
+This is an INI reader, not a complete Dotenv implementation. Dotenv-specific
+features such as `export KEY=value`, shell expansion, and complex multiline
+values are not supported.
 
 ### `text`
 
@@ -1084,6 +1153,39 @@ An inconsistency exits with status `1`, so the workflow fails. Invalid
 configuration, unreadable files, parse failures, and invalid selectors exit
 with status `2`.
 
+For a workflow triggered by a Git tag, the tag name is available in
+`GITHUB_REF_NAME`. It can be compared directly without creating a temporary
+file:
+
+```yaml
+checks:
+  release-version:
+    normalize:
+      - trim-v-prefix
+      - version
+    expected:
+      reader: env
+      variable: GITHUB_REF_NAME
+    values:
+      version-file:
+        reader: text
+        file: VERSION
+```
+
+Run that check only for tag events:
+
+```yaml
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    if: github.ref_type == 'tag'
+    # Checkout, install dependencies, then run the checker.
+```
+
 ## Using the library API
 
 The CLI is a thin wrapper around `ConfigurationLoader` and `Engine`.
@@ -1197,6 +1299,12 @@ file: MANIFEST
 path: $.release
 ```
 
+Readers that consume a named value rather than a file may additionally
+implement `DirectInputReader`. Its `inputField()` method declares the
+configuration field passed unchanged to `read()`. The built-in `env` reader,
+for example, declares `variable`; file readers continue to receive an absolute
+file path.
+
 ### Custom normalizer
 
 Implement `Normalizer`:
@@ -1261,7 +1369,8 @@ Examples include:
 - unknown reader;
 - unknown normalizer;
 - unreadable file;
-- invalid JSON, YAML, or XML;
+- missing environment variable;
+- invalid JSON, YAML, NEON, INI, or XML;
 - invalid JSONPath;
 - selector returning zero or several values;
 - selector returning an array or object;
@@ -1288,6 +1397,12 @@ All checks are evaluated, so one run reports every discovered inconsistency.
 
 The package never updates source files. There is no search-and-replace or
 automatic version bumping.
+
+### Environment variables
+
+The `env` reader only reads the variable explicitly named in the configuration.
+Its value may be displayed in mismatch reports, so it should be used for
+non-secret metadata such as CI tag names, not credentials or tokens.
 
 ### PHP files are not executed
 
