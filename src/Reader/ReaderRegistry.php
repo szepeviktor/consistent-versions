@@ -17,6 +17,7 @@ final class ReaderRegistry
         $registry->register('json', new JsonReader());
         $registry->register('composer', new ComposerReader());
         $registry->register('yaml', new YamlReader());
+        $registry->register('neon', new NeonReader());
         $registry->register('xml', new XmlReader());
         $registry->register('phpcs', new PhpcsReader());
         $registry->register('html', new HtmlReader());

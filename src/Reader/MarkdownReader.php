@@ -37,11 +37,12 @@ final class MarkdownReader extends AbstractFileReader
             'headings' => [],
             'links' => [],
             'images' => [],
-            'html' => $this->htmlReader->readString($contents),
+            'html' => [],
             'text' => $contents,
         ];
 
         $inFence = false;
+        $htmlLines = [];
         foreach ($lines as $line) {
             $trimmed = ltrim($line);
             if (str_starts_with($trimmed, '```') || str_starts_with($trimmed, '~~~')) {
@@ -52,12 +53,14 @@ final class MarkdownReader extends AbstractFileReader
                 continue;
             }
 
+            $htmlLines[] = $line;
             $heading = $this->heading($line);
             if ($heading !== null) {
                 $document['headings'][] = $heading;
             }
             $this->inlineDestinations($line, $document);
         }
+        $document['html'] = $this->htmlReader->readString(implode("\n", $htmlLines));
 
         return new Document($document, $path);
     }

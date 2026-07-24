@@ -1,0 +1,26 @@
+checks:
+  minimum-php:
+    normalize: version
+    expected:
+      reader: composer
+      file: ../composer.json
+      path: $.require.php
+      normalize: composer-minimum
+    values:
+      composer-platform:
+        reader: composer
+        file: ../composer.json
+        path: $.config.platform.php
+      phpstan:
+        reader: neon
+        file: ../phpstan.neon
+        path: $.parameters.phpVersion
+        normalize: php-version-id
+      github-actions:
+        reader: yaml
+        file: ../.github/workflows/integrate.yml
+        path: $.jobs['run-all'].strategy.matrix['php-version'][0]
+      readme:
+        reader: markdown
+        file: ../README.md
+        path: $.html.meta['requires-php']

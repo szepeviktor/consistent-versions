@@ -36,6 +36,11 @@ checks:
         reader: yaml
         file: .github/workflows/tests.yml
         path: $.jobs.tests.strategy.matrix.php[0]
+      phpstan:
+        reader: neon
+        file: phpstan.neon
+        path: $.parameters.phpVersion
+        normalize: php-version-id
       plugin-header:
         reader: wordpress-plugin
         file: plugin.php

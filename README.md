@@ -1,3 +1,5 @@
+<meta name="requires-php" content="8.1">
+
 # Consistent Versions
 
 Consistent Versions checks that version-related values stored in different
@@ -10,6 +12,7 @@ places, for example:
 - a WordPress.org `readme.txt`;
 - `composer.json`;
 - a GitHub Actions workflow;
+- a PHPStan NEON configuration;
 - a PHPCS ruleset;
 - a PHP class constant;
 - Markdown documentation;
@@ -540,6 +543,41 @@ Selector for the lowest tested PHP version:
 path: $.jobs.tests.strategy.matrix.php[0]
 ```
 
+### `neon`
+
+Parses a NEON file into objects, arrays, and scalar values. It uses the native
+NEON parser rather than treating NEON as YAML.
+
+For example, PHPStan may declare its target PHP version as a
+[`PHP_VERSION_ID`](https://www.php.net/manual/en/reserved.constants.php):
+
+```neon
+parameters:
+    phpVersion: 80100
+    level: max
+```
+
+The raw integer is available at:
+
+```yaml
+reader: neon
+file: phpstan.neon
+path: $.parameters.phpVersion
+```
+
+To compare it with values such as `8.1`, apply the `php-version-id`
+normalizer:
+
+```yaml
+reader: neon
+file: phpstan.neon
+path: $.parameters.phpVersion
+normalize: php-version-id
+```
+
+This reader parses the contents of the selected file only. It does not merge
+files referenced by PHPStan's `includes` setting or apply PHPStan defaults.
+
 ### `xml`
 
 Parses XML into a uniform node tree. Every node exposes:
@@ -897,6 +935,18 @@ This makes common equivalent representations comparable, for example:
 
 Invalid versions produce a configuration error.
 
+### `php-version-id`
+
+Converts PHP's integer version representation to a dotted version:
+
+| Input | Result |
+| --- | --- |
+| `80100` | `8.1` |
+| `80102` | `8.1.2` |
+
+The input must be an integer or a string containing only decimal digits. This
+is useful for PHPStan's `parameters.phpVersion` setting.
+
 ### `composer-minimum`
 
 Extracts the inclusive numeric lower bound from a Composer constraint:
@@ -980,6 +1030,12 @@ checks:
         reader: yaml
         file: .github/workflows/tests.yml
         path: $.jobs.tests.strategy.matrix.php[0]
+
+      phpstan:
+        reader: neon
+        file: phpstan.neon
+        path: $.parameters.phpVersion
+        normalize: php-version-id
 
       plugin-header:
         reader: wordpress-plugin
@@ -1309,6 +1365,16 @@ Run every quality check:
 
 ```bash
 composer all
+```
+
+The repository checks its own minimum PHP version declarations with
+[`tests/consistent-versions.yaml`](tests/consistent-versions.yaml). The
+self-check compares Composer's package constraint and platform version,
+PHPStan's target version, the oldest GitHub Actions matrix entry, and the
+machine-readable metadata in this README:
+
+```bash
+composer versions
 ```
 
 PHPStan analyses `src`, `tests`, and `tools` at level `max`. There is no

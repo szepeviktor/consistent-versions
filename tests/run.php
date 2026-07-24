@@ -34,6 +34,7 @@ $value = static function (string $reader, string $file, string $path) use ($read
 $same('1.2.3', $value('json', 'data.json', '$.package.version'), 'JSON reader');
 $same('^8.1', $value('composer', 'composer.json', '$.require.php'), 'Composer reader');
 $same('8.1', $value('yaml', 'data.yaml', '$.jobs.tests.strategy.matrix.php[0]'), 'YAML reader');
+$same(80100, $value('neon', 'phpstan.neon', '$.parameters.phpVersion'), 'NEON reader');
 $same('8.1-', $value('phpcs', 'phpcs.xml', '$.config.testVersion'), 'PHPCS reader');
 $same('true', $value('xml', 'document.xml', '$.attributes.active'), 'XML reader attributes');
 $same('1.2.3', $value('xml', 'document.xml', '$.children[?@.name == "version"].text'), 'XML JSONPath filter');
@@ -59,6 +60,8 @@ $same('1.2.3', $value('json', 'data.json', '$..version'), 'JSONPath recursive de
 
 $normalizers = NormalizerRegistry::withDefaults();
 $same('8.1', $normalizers->normalize('^8.1', ['composer-minimum']), 'Composer lower bound');
+$same('8.1', $normalizers->normalize(80100, ['php-version-id']), 'PHP version ID');
+$same('8.1.2', $normalizers->normalize('80102', ['php-version-id']), 'PHP version ID with patch');
 $same('1.2.3', $normalizers->normalize('v1.2.3', ['trim-v-prefix', 'version']), 'Version normalization');
 
 $configuration = [
@@ -88,6 +91,12 @@ $configuration = [
                     'reader' => 'yaml',
                     'file' => 'data.yaml',
                     'path' => '$.jobs.tests.strategy.matrix.php[0]',
+                ],
+                'PHPStan' => [
+                    'reader' => 'neon',
+                    'file' => 'phpstan.neon',
+                    'path' => '$.parameters.phpVersion',
+                    'normalize' => 'php-version-id',
                 ],
                 'plugin header' => [
                     'reader' => 'wordpress-plugin',

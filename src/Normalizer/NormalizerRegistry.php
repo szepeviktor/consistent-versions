@@ -37,6 +37,7 @@ final class NormalizerRegistry
         ));
         $registry->register('version', new VersionNormalizer());
         $registry->register('composer-minimum', new ComposerMinimumNormalizer());
+        $registry->register('php-version-id', new PhpVersionIdNormalizer());
 
         return $registry;
     }
