@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<project active="true">
+    <version channel="stable">1.2.3</version>
+    <component>one</component>
+    <component>two</component>
+</project>

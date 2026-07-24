@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use SzepeViktor\ConsistentVersions\Console\Application;
+
+$autoloadCandidates = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+foreach ($autoloadCandidates as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        exit((new Application())->run($argv));
+    }
+}
+
+fwrite(STDERR, "Could not find Composer autoloader.\n");
+exit(2);

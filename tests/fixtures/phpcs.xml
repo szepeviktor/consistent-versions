@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="Example">
+    <description>Example rules</description>
+    <config name="testVersion" value="8.1-"/>
+    <arg name="basepath" value="."/>
+    <rule ref="PSR12"/>
+</ruleset>

@@ -1,0 +1,37 @@
+checks:
+  release-version:
+    normalize: version
+    expected:
+      reader: text
+      file: VERSION
+    values:
+      plugin:
+        reader: wordpress-plugin
+        file: plugin.php
+        path: $.Version
+      readme:
+        reader: wordpress-readme
+        file: readme.txt
+        path: $['Stable tag']
+      php:
+        reader: php
+        file: constants.php
+        path: $.classes['Example\\Plugin'].constants.VERSION
+
+  minimum-php:
+    normalize: version
+    expected: "8.1"
+    values:
+      yaml:
+        reader: yaml
+        file: data.yaml
+        path: $.jobs.tests.strategy.matrix.php[0]
+      plugin:
+        reader: wordpress-plugin
+        file: plugin.php
+        path: $['Requires PHP']
+      composer:
+        reader: composer
+        file: composer.json
+        path: $.require.php
+        normalize: composer-minimum

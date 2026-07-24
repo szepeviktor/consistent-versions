@@ -1,0 +1,42 @@
+checks:
+  release-version:
+    normalize:
+      - trim-v-prefix
+      - version
+    expected:
+      reader: text
+      file: VERSION
+    values:
+      composer:
+        reader: composer
+        file: composer.json
+        path: $.version
+      plugin-header:
+        reader: wordpress-plugin
+        file: plugin.php
+        path: $.Version
+      wordpress-readme:
+        reader: wordpress-readme
+        file: readme.txt
+        path: $['Stable tag']
+      php-constant:
+        reader: php
+        file: src/Plugin.php
+        path: $.classes['Vendor\\Plugin'].constants.VERSION
+
+  minimum-php:
+    normalize: version
+    expected:
+      reader: composer
+      file: composer.json
+      path: $.require.php
+      normalize: composer-minimum
+    values:
+      github-actions:
+        reader: yaml
+        file: .github/workflows/tests.yml
+        path: $.jobs.tests.strategy.matrix.php[0]
+      plugin-header:
+        reader: wordpress-plugin
+        file: plugin.php
+        path: $['Requires PHP']
