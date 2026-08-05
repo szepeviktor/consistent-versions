@@ -11,6 +11,7 @@ places, for example:
 - a WordPress plugin header;
 - a WordPress.org `readme.txt`;
 - `composer.json`;
+- `package.json`;
 - a GitHub Actions workflow;
 - a PHPStan NEON configuration;
 - a PHPCS ruleset;
@@ -616,6 +617,14 @@ Selector:
 
 ```yaml
 path: $.package.version
+```
+
+For `package.json`, use the generic JSON reader:
+
+```yaml
+reader: json
+file: package.json
+path: $.version
 ```
 
 Invalid JSON is a parsing error.
