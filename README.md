@@ -11,6 +11,7 @@ places, for example:
 - a WordPress plugin header;
 - a WordPress.org `readme.txt`;
 - `composer.json`;
+- Dockerfile `ARG` defaults;
 - `package.json`;
 - a GitHub Actions workflow;
 - a PHPStan NEON configuration;
@@ -649,6 +650,40 @@ reader: composer
 file: composer.json
 path: $.require.php
 normalize: composer-minimum
+```
+
+### `dockerfile`
+
+Reads Dockerfile `ARG` instructions and exposes their default values.
+
+Input:
+
+```dockerfile
+ARG PHP_VERSION=8.1
+ARG PLUGIN_VERSION=1.2.3
+ARG NO_DEFAULT
+
+FROM php:${PHP_VERSION}-cli
+```
+
+Virtual document:
+
+```json
+{
+    "args": {
+        "PHP_VERSION": "8.1",
+        "PLUGIN_VERSION": "1.2.3",
+        "NO_DEFAULT": null
+    }
+}
+```
+
+Selector:
+
+```yaml
+reader: dockerfile
+file: Dockerfile
+path: $.args.PHP_VERSION
 ```
 
 ### `yaml`

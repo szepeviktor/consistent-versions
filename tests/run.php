@@ -39,6 +39,10 @@ $same('WP-CLI 2.12.0', $value('gettext', 'messages.pot', "$.headers['X-Generator
 $same('8.1', $value('ini', 'settings.ini', '$.PHP_VERSION'), 'INI reader');
 $same('2.0.0', $value('ini', 'settings.ini', '$.tool.version'), 'INI section');
 $same('^8.1', $value('composer', 'composer.json', '$.require.php'), 'Composer reader');
+$same('8.1', $value('dockerfile', 'Dockerfile', '$.args.PHP_VERSION'), 'Dockerfile ARG default');
+$same('', $value('dockerfile', 'Dockerfile', '$.args.EMPTY_VALUE'), 'Dockerfile empty ARG default');
+$same(null, $value('dockerfile', 'Dockerfile', '$.args.NO_DEFAULT'), 'Dockerfile ARG without default');
+$same('2.0.0', $value('dockerfile', 'Dockerfile', '$.args.RUNTIME_VERSION'), 'Dockerfile stage ARG default');
 $same('8.1', $value('yaml', 'data.yaml', '$.jobs.tests.strategy.matrix.php[0]'), 'YAML reader');
 $same(80100, $value('neon', 'phpstan.neon', '$.parameters.phpVersion'), 'NEON reader');
 $same('8.1-', $value('phpcs', 'phpcs.xml', '$.config.testVersion'), 'PHPCS reader');

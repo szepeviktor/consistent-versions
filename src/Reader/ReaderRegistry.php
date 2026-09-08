@@ -19,6 +19,7 @@ final class ReaderRegistry
         $registry->register('ini', new IniReader());
         $registry->register('json', new JsonReader());
         $registry->register('composer', new ComposerReader());
+        $registry->register('dockerfile', new DockerfileReader());
         $registry->register('yaml', new YamlReader());
         $registry->register('neon', new NeonReader());
         $registry->register('xml', new XmlReader());
