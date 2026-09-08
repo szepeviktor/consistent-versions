@@ -35,6 +35,7 @@ final class NormalizerRegistry
                 return is_string($value) && str_starts_with($value, 'v') ? substr($value, 1) : $value;
             }
         ));
+        $registry->register('wp-env-core', new WpEnvCoreNormalizer());
         $registry->register('version', new VersionNormalizer());
         $registry->register('composer-minimum', new ComposerMinimumNormalizer());
         $registry->register('php-version-id', new PhpVersionIdNormalizer());

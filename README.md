@@ -1052,6 +1052,19 @@ v1.2.3 → 1.2.3
 
 An uppercase `V` is not removed.
 
+### `wp-env-core`
+
+Converts a WordPress core GitHub branch reference accepted by `wp-env` to the
+plain WordPress version.
+
+```text
+WordPress/WordPress#6.9-branch -> 6.9
+```
+
+Other string values are returned unchanged, so values such as `latest` and
+`WordPress/WordPress#master` can still be selected elsewhere without becoming
+version numbers.
+
 ### `version`
 
 Parses and normalizes version strings using Composer's version parser.

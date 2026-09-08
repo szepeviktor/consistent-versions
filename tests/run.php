@@ -72,6 +72,8 @@ $normalizers = NormalizerRegistry::withDefaults();
 $same('8.1', $normalizers->normalize('^8.1', ['composer-minimum']), 'Composer lower bound');
 $same('8.1', $normalizers->normalize(80100, ['php-version-id']), 'PHP version ID');
 $same('8.1.2', $normalizers->normalize('80102', ['php-version-id']), 'PHP version ID with patch');
+$same('6.9', $normalizers->normalize('WordPress/WordPress#6.9-branch', ['wp-env-core']), 'wp-env WordPress core branch');
+$same('latest', $normalizers->normalize('latest', ['wp-env-core']), 'wp-env latest WordPress core');
 $same('1.2.3', $normalizers->normalize('v1.2.3', ['trim-v-prefix', 'version']), 'Version normalization');
 
 $configuration = [
